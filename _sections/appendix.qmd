@@ -1,0 +1,44 @@
+
+## Variational approximations {.appendix}
+
+Our model can generally be written as
+
+$$
+{\bf y}_{t+1} = {\bf r} + u_m{\bf 1}_S + {\bf D}^{(\alpha)} + a\overset{\circ}{\bf H}N_t + \overset{\circ}{\bf A}N_t + {\bf X}_t^\text{(site)} \boldsymbol \beta + {\bf X}_t^\text{(spp)}\boldsymbol \gamma + {\bf W}_t{\boldsymbol \epsilon}_{t+1}
+$$ {#eq-basemod-expanded}
+where ${\bf y}_{t+1} = \big(\log (N_{1,t+1}/N_{1,t}),...,\log (N_{S,t+1}/N_{S,t})\big)^\top$ is a vector of log growth for each species, $1,2,...,S$. The vector $\bf r$ is an $S$-vector of intrinsic growth rates for each species, which is modified by the site effect $u_m \sim \mathcal{N}(0, \sigma_u^2)$ for site $m = 1,2,...,M$. We assume that the site effects are consistent across species, implying that some sites are simply more productive than others and that this generally benefits the growth of all species at the site. Site-level covariates can also be included in ${\bf X}_t^\text{site}$ to model fixed effects of sites, such as site-level treatments or environmental characteristics. 
+
+The term ${\bf D}^{(\alpha)}$ is a diagonal matrix with the intra-specific competitive effects along the diagonal such that $D^{(\alpha)}_{ii}$ is the effect of increasing the density of species $i$ on itself. The term $\overset{\circ}{\bf H}$ is a *hollow* matrix (a matrix with zeros along the diagonal) with ones in all the off-diagonal elements such that $a\overset{\circ}{\bf H}$ is a hollow matrix with $a$, the *generic competitive effect*, in all off-diagonal elements. Thus, the parameter matrix $\overset{\circ}{\bf A}$ is also hollow and assumed sparse, and contains the deviations from the effect of a generic competitor. A non-generic competitor's effect on the growth of species $i$ will be $(a + \overset{\circ}{A_{ij}})N_{jt}$ for competitor $j\ne i$, while a generic competitor's effect will be $aN_{j,t}$ due to the assumed sparsity of $\overset{\circ}{\bf A}$.
+
+Species-level covariates can be included in the model through the $S \times K$ matrix ${\bf X}_t^\text{(spp)}$, and additional interactive effects, such as alterations to a species competitive effect on others based on the environment at the site, can be included with interactions among these main effects. Finally, ${\bf W}_t$ is a diagonal weights matrix that scales the errors, ${\boldsymbol \epsilon}_1, {\boldsymbol \epsilon}_2,...,{\boldsymbol \epsilon}_T \overset{iid}{\sim} \mathcal{N}({\bf 0},\ {\bf I}_S)$, where ${\bf I}_S$ is the $S \times S$ identity matrix.
+
+While there are many terms in @eq-basemod-expanded, this can be written quite succinctly as a *seemingly unrelated regressions* model by concatenating parameters into a single, high-dimensional vector and concatenating design matrices columnwise, padding with zeros as needed. Specifically,
+
+$$
+{\bf y} = \tilde{\bf X} \tilde{\boldsymbol \beta} + {\bf W}{\boldsymbol \epsilon}
+$$
+where ${\bf y} = \big({\bf y}^\top_{1,1},...,{\bf y}^\top_{1,M},{\bf y}^\top_{2,1},...,{\bf y}_{2,M}^\top,...,{\bf y}^\top_{T,M} \big)^\top$ is a vector of length $S \cdot M \cdot T$. The parameter vector $\tilde{\boldsymbol \beta}$ is a vector with the site-level parameters in the first elements, followed by the species-specific parameters concatenated on row-wise. As an example, assume there is a single, random site effect, $u_1, ..., u_M$, the species-specific terms include biotic interactions along with intrinsic growth. In this instance,
+
+$$
+\tilde{\boldsymbol \beta} = \big(a, {\bf u}^\top, {\bf r}^\top, \text{vec}({\bf A}^\top)^\top \big)^\top
+$$
+where $\text{vec}({\bf A}^\top)$ is the vectorization operator, vectorizing the non-hollow matrix ${\bf A} = {\bf D}_\alpha + \overset{\circ}{\bf A}$. Thus, the length of $\tilde{\boldsymbol \beta}$ will be $1 + M + S + S^2$. The design matrix, ${\tilde{\bf X}}$, which has dimensions $(S\cdot M \cdot T) \times (1 + M + S + S^2)$ can then be constructed by concatenating columns of the following matrices:
+
+- ${\bf 1}_{S\cdot M \cdot T}$
+
+- $\begin{bmatrix}({\bf I}_{M} \otimes {\bf 1}_S)_1\\ \vdots \\ ({\bf I}_{M} \otimes {\bf 1}_S)_T\end{bmatrix}$
+
+- ${\bf 1}_{M\cdot T} \otimes {\bf I}_{S}$
+
+- $\tilde{\bf N} = \begin{bmatrix} {\bf I}_S \otimes {\bf N}_{1,1}\\ {\bf I}_S \otimes {\bf N}_{2,1}\\ \vdots \\ {\bf I}_S \otimes {\bf N}_{M,T} \end{bmatrix}$
+
+where $\otimes$ denotes the Kronecker product and ${\bf N}_{m,t}$ is the row-vector of species abundances at site $m$ at time step $t$.
+
+
+
+
+
+
+
+
+

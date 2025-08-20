@@ -1,0 +1,13 @@
+---
+title: "Estimating community dynamics models with sparse interaction networks"
+authors:
+  - name: Dustin Gannon
+    affiliation: Forest Ecosystems and Society, Oregon State University
+    roles: writing
+    corresponding: true
+bibliography: references.bib
+---
+
+## Introduction
+
+{{< include _sections/appendix.qmd >}}
