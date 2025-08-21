@@ -1,5 +1,5 @@
 
-## Variational approximations {.appendix}
+## Reformulating the model {.appendix}
 
 Our model can generally be written as
 
@@ -15,30 +15,58 @@ Species-level covariates can be included in the model through the $S \times K$ m
 While there are many terms in @eq-basemod-expanded, this can be written quite succinctly as a *seemingly unrelated regressions* model by concatenating parameters into a single, high-dimensional vector and concatenating design matrices columnwise, padding with zeros as needed. Specifically,
 
 $$
-{\bf y} = \tilde{\bf X} \tilde{\boldsymbol \beta} + {\bf W}{\boldsymbol \epsilon}
-$$
-where ${\bf y} = \big({\bf y}^\top_{1,1},...,{\bf y}^\top_{1,M},{\bf y}^\top_{2,1},...,{\bf y}_{2,M}^\top,...,{\bf y}^\top_{T,M} \big)^\top$ is a vector of length $S \cdot M \cdot T$. The parameter vector $\tilde{\boldsymbol \beta}$ is a vector with the site-level parameters in the first elements, followed by the species-specific parameters concatenated on row-wise. As an example, assume there is a single, random site effect, $u_1, ..., u_M$, the species-specific terms include biotic interactions along with intrinsic growth. In this instance,
+{\bf y} = \tilde{\bf X} \tilde{\boldsymbol \beta} + {\bf Z}{\bf u} + {\bf W}\boldsymbol \epsilon
+$$ {#eq-basemod-condensed}
+where ${\bf y} = \big({\bf y}^\top_{1,1},...,{\bf y}^\top_{1,M},{\bf y}^\top_{2,1},...,{\bf y}_{2,M}^\top,...,{\bf y}^\top_{T,M} \big)^\top$ is a vector of length $S \cdot M \cdot T$. The parameter vector $\tilde{\boldsymbol \beta}$ is a vector of all fixed effects, while $\bf u$ contains the random effects. As an example, assume there is a single, random site effect, $u_1, ..., u_M$, and the fixed effects include species-specific terms for biotic interactions along with intrinsic growth. In this instance,
 
 $$
-\tilde{\boldsymbol \beta} = \big(a, {\bf u}^\top, {\bf r}^\top, \text{vec}({\bf A}^\top)^\top \big)^\top
+{\bf u} = \big(u_1, u_2, ..., u_M \big)^\top;\ \tilde{\boldsymbol \beta} = \big(a, {\bf r}^\top, \text{vec}({\bf A}^\top)^\top \big)^\top
 $$
-where $\text{vec}({\bf A}^\top)$ is the vectorization operator, vectorizing the non-hollow matrix ${\bf A} = {\bf D}_\alpha + \overset{\circ}{\bf A}$. Thus, the length of $\tilde{\boldsymbol \beta}$ will be $1 + M + S + S^2$. The design matrix, ${\tilde{\bf X}}$, which has dimensions $(S\cdot M \cdot T) \times (1 + M + S + S^2)$ can then be constructed by concatenating columns of the following matrices:
+where $\text{vec}(\cdot)$ is the vectorization operator, vectorizing the non-hollow matrix ${\bf A} = {\bf D}_\alpha + \overset{\circ}{\bf A}$. Thus, the length of $\tilde{\boldsymbol \beta}$ will be $1 + S + S^2$. The design matrix, ${\tilde{\bf X}}$, which has dimensions $(S\cdot M \cdot T) \times (1 + S + S^2)$ can then be constructed by concatenating columns of the following matrices:
 
 - ${\bf 1}_{S\cdot M \cdot T}$
-
-- $\begin{bmatrix}({\bf I}_{M} \otimes {\bf 1}_S)_1\\ \vdots \\ ({\bf I}_{M} \otimes {\bf 1}_S)_T\end{bmatrix}$
 
 - ${\bf 1}_{M\cdot T} \otimes {\bf I}_{S}$
 
 - $\tilde{\bf N} = \begin{bmatrix} {\bf I}_S \otimes {\bf N}_{1,1}\\ {\bf I}_S \otimes {\bf N}_{2,1}\\ \vdots \\ {\bf I}_S \otimes {\bf N}_{M,T} \end{bmatrix}$
 
-where $\otimes$ denotes the Kronecker product and ${\bf N}_{m,t}$ is the row-vector of species abundances at site $m$ at time step $t$.
+where $\otimes$ denotes the Kronecker product and ${\bf N}_{m,t}$ is the row-vector of species abundances at site $m$ at time step $t$. Similarly, the design matrix $\bf Z$ can be constructed as
 
+- ${\bf Z} = \begin{bmatrix}({\bf I}_{M} \otimes {\bf 1}_S)_1\\ \vdots \\ ({\bf I}_{M} \otimes {\bf 1}_S)_T\end{bmatrix}$.
 
+This then becomes a (potentially large) regression problem. 
 
+## Variational approximations {.appendix}
 
+The key to our variational approximation approach is proper book-keeping of the parameters that have all been stacked into $\tilde{\boldsymbol \beta}$. While all are, in essence, regression coefficients, some receive spike-slab shrinkage priors to shrink them towards zero [@mitchell_spikeslab_1988; @ishwaran_spikeslab_2005], while others receive weakly informative normal priors with mean 0 and standard deviation 2.5. The first $S + 1$ parameters all receive weakly informative normal priors, and, because $\epsilon_{i,m,t}$ is normally-distributed for all $i,\ m,$ and $t$, the conditional posterior of $\tilde \beta_k$ is normal for $k = \{1, 2, ..., S+1\}$. The variational update for the mean and standard deviation of $\tilde\beta_k$, conditional on the current values of all the other parameters, is therefore
 
+$$
+\begin{split}
+\mu_k = \frac{{\bf e}_{-k}^\top {\bf W}^{-1} \tilde{\bf X}_k}{\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k + \frac{1}{\tau^2}} \\
+s_k^2 = \left(\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k + \frac{1}{\tau^2}\right)^{-1}
+\end{split}
+$$ {#eq-update-nonsprs}
 
+where ${\bf e}_{-k}$ is the vector of partial residuals from regressing ${\bf y}$ against all covariates *except* $\tilde{\bf X}_k$, using the expected values of the current posterior of the regression coefficients, and $\tilde{\bf X}_k$ is the $k^\text{th}$ column of the design matrix $\tilde{\bf X}$. The hyperparameter $\tau^2$ is the variance of the of the normal prior placed on $\tilde \beta_k$ and the inverse weights matrix, ${\bf W}^{-1}$, is filled in with its expected values at the current step. 
+
+For regression coefficients that get spike-slab priors, we assume that 
+
+$$
+\pi(\tilde \beta_k | \delta_k, {\bf W}) = \begin{cases}
+\mathcal{N}(0, \tau^2) & \text{w.p. } \phi_k\\
+0 & \text{w.p. } 1 - \phi_k
+\end{cases}
+$$
+Thus, 
+
+$$
+\begin{split}
+\mu_k = \frac{{\bf e}_{-k}^\top {\bf W}^{-1} \tilde{\bf X}_k}{\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k + \frac{1}{\tau^2}} \mathbb{E} [\delta_k] \\
+s_k^2 = \left(\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k + \frac{1}{\tau^2}\right)^{-1}
+\end{split}
+$$ {#eq-update-sparse}
+
+where $\mathbb{E}[\delta_k]$ is the current expectation of the indicator variable $\delta_k$. 
 
 
 
