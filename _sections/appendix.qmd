@@ -73,7 +73,7 @@ $$ {#eq-update-sparse}
 
 where $\mathbb{E}[\delta_k]$ is the current expectation of the indicator variable $\delta_k$. Note that these derivations are similar to those presented in @carbonetto_vb_2012, but with weights included. We also use simple conjugate priors and variational approximations for the error variances instead of the Importance Sampling approach proposed by @carbonetto_vb_2012. 
 
-### Conditional posteriors and updates for latend indicators {.appendix}
+### Conditional posteriors and updates for latent indicators {.appendix}
 
 The variational update for the latent variable $\delta_k$ is derived by setting $\delta_k = 1$ and $\delta_k = 0$ in turn. The update for $1 - P(\delta_k)$ can be shown to be
 
@@ -122,6 +122,31 @@ $$
 \hat{v}_{\xi}^{(t+1)} = \left(\mathbb{E}^{(t)}({\boldsymbol \psi}^\top {\bf Z}^\top {\bf W}^{-1} {\bf Z} \boldsymbol \psi) + \mathbb{E}^{(t)}(c^{-2}) \right)^{-1}
 $$ {#eq-update-xi-var}
 where $\mathbb{E}^{(t)}$ denotes the expected value of the current conditional posterior and a superscript of $(t+1)$ indicates an update to the parameter of interest on the next iteration of the algorithm.
+
+Similarly, the conditional posterior for $\psi_m$ is
+
+$$
+p(\psi_m\ |\ {\boldsymbol \theta}_{-\psi_m},\ {\bf y}) = \mathcal{N}\left(\frac{{\bf e}_{-\psi_m}^\top {\bf W}^{-1} {\bf Z}_m \xi}{{\bf Z}_m^\top {\bf W}^{-1} {\bf Z}_m \xi^2 + s^{-2}},\ \frac{1}{{\bf Z}_m^\top {\bf W}^{-1} {\bf Z}_m \xi^2 + s^{-2}}\right)
+$$
+where ${\bf e}_{-\psi_m}$ is the vector of (partial) conditional residuals without the adjustment to the mean due to $\xi\psi_m$. This leads to the update equations
+
+$$
+\hat{\mu}_{\psi_m}^{(t+1)} = \frac{\mathbb{E}^{(t)}({\bf e}_{-\psi_m})^\top \mathbb{E}^{(t)}({\bf W}^{-1}) {\bf Z}_m \mathbb{E}^{(t)}(\xi)}{{\bf Z}_m^\top \mathbb{E}^{(t)}({\bf W}^{-1}) {\bf Z}_m \mathbb{E}^{(t)}(\xi^2) + \mathbb{E}(s^{-2})}
+$$ {#eq-update-psi-mean}
+and
+$$
+\hat{v}_{\psi_m}^{(t+1)} = \left( {\bf Z}_m^\top \mathbb{E}^{(t)}({\bf W})^{-1} {\bf Z}_m \mathbb{E}^{(t)}(\xi^2) + \mathbb{E}^{(t)}(s^{-2}) \right)^{-1}.
+$${#eq-update-psi-var}
+
+The conditional posterior of $s^2$ is also Inverse-Gamma, with shape parameter
+$$
+a_{s} = 
+$$
+and rate parameter
+$$
+b_s = 
+$$
+
 
 Finally, we can update the error variances, which, for $\sigma_1^2,\sigma_2^2,...,\sigma_S^2$ we give inverse gamma priors with shape parameters $b_{1,i}$ and rate parameter $b_{2,i}$. Because of conjugacy, the conditional posterior is also inverse gamma, with constant shape parameter $n/2 + b_{1,i}$ and updates to the rate parameter of
 
