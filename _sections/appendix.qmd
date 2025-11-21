@@ -139,19 +139,23 @@ $$
 $${#eq-update-psi-var}
 
 The conditional posterior of $s^2$ is also Inverse-Gamma, with shape parameter
+<!-- Double check this!!! -->
 $$
-a_{s} = 
+a_{s} = \frac{\nu}{2} + K
 $$
 and rate parameter
 $$
-b_s = 
+b_s = \frac{1}{2}\left(\nu + \sum_j \psi_j^2\right).
 $$
+The shape parameter is therefore constant across the updates, but the rate parameter updates are given by
+$$
+b_s^{(t+1)} = \frac{1}{2}\nu + \frac{1}{2}\sum_j \mathbb{E}^{(t)}(\psi_j^2).
+$${#eq-update-s2-rate}
 
-
-Finally, we can update the error variances, which, for $\sigma_1^2,\sigma_2^2,...,\sigma_S^2$ we give inverse gamma priors with shape parameters $b_{1,i}$ and rate parameter $b_{2,i}$. Because of conjugacy, the conditional posterior is also inverse gamma, with constant shape parameter $n/2 + b_{1,i}$ and updates to the rate parameter of
+Finally, we can update the error variances, which, for $\sigma_1^2,\sigma_2^2,...,\sigma_S^2$ we give improper Jeffrey's priors of $1/\sigma_i^2$ for $i = 1,2,...,S$. The conditional posterior is therefore inverse gamma, with constant shape parameter $n/2$ and updates to the rate parameter of
 
 $$
-R_i = \frac{1}{2}\left({\bf y}_{[i]}^\top{\bf y}_{[i]} - {\bf y}_{[i]}^\top\tilde{\bf X}_{[i]} \mathbb{E}(\tilde {\boldsymbol \beta}) - \mathbb{E}(\tilde{\boldsymbol \beta})^\top \tilde{\bf X}_{[i]}^\top {\bf y}_{[i]} + \mathbb{E}(\tilde{\boldsymbol \beta})^\top \tilde{\bf X}_{[i]}^\top \tilde{\bf X}\ \mathbb{E}(\tilde{\boldsymbol \beta})\right) + b_{2,i}
+b_{\sigma_i} = \frac{1}{2}\left({\bf y}_{[i]}^\top{\bf y}_{[i]} - {\bf y}_{[i]}^\top\tilde{\bf X}_{[i]} \mathbb{E}(\tilde {\boldsymbol \beta}) - \mathbb{E}(\tilde{\boldsymbol \beta})^\top \tilde{\bf X}_{[i]}^\top {\bf y}_{[i]} + \mathbb{E}(\tilde{\boldsymbol \beta})^\top \tilde{\bf X}_{[i]}^\top \tilde{\bf X}\ \mathbb{E}(\tilde{\boldsymbol \beta})\right)
 $$
 
 where ${\bf y}_{[i]}$ are just the elements of $\bf y$ that involve species $i$.
