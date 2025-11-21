@@ -8,6 +8,8 @@ authors:
 bibliography: references.bib
 ---
 
-## Introduction
+<!-- Introduction document -->
+{{< include _sections/intro.qmd >}}
 
+<!-- Appendix document -->
 {{< include _sections/appendix.qmd >}}

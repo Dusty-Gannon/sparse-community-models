@@ -1,0 +1,4 @@
+## Introduction
+
+Jointly modeling species-rich community dynamics for inference and forecasting is a long-term goal in community ecology. Most community dynamics models come from theoretical difference or differential equation models that tend to be parameter-rich and therefore difficult to estimate from observational data. The parameter vector can become especially high-dimensional when additional, real-world complexities are integrated into a model, such as higher-order interactions and interactions that can change depending on environmental conditions.
+

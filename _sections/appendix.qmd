@@ -1,4 +1,6 @@
 
+## Appendix
+
 ## Reformulating the model {.appendix}
 
 Our model can generally be written as
@@ -115,11 +117,11 @@ q(\xi|\boldsymbol \theta_{-\xi},{\bf y}) = \exp\left\{\mathbb{E}_{-\xi}\left[ \l
 $$
 where $\mathbb{E}_{-\xi}$ denotes the expectation taken over all parameters *except* $\xi$. This yields the updates
 $$
-\hat\mu_\xi^{(t+1)} = \frac{\mathbb{E}^{(t)}({\bf r})^\top \mathbb{E}^{(t)}({\bf W}^{-1}) {\bf Z}\ \mathbb{E}^{(t)}(\boldsymbol \psi)}{\mathbb{E}^{(t)}({\boldsymbol \psi}^\top {\bf Z}^\top {\bf W}^{-1} {\bf Z} \boldsymbol \psi) + \mathbb{E}^{(t)}(c^{-2})}
+\hat\mu_\xi^{(t+1)} = \frac{\mathbb{E}^{(t)}({\bf r})^\top \mathbb{E}^{(t)}({\bf W}^{-1}) {\bf Z}\ \mathbb{E}^{(t)}(\boldsymbol \psi)}{\mathbb{E}^{(t)}({\boldsymbol \psi}^\top {\bf Z}^\top {\bf W}^{-1} {\bf Z} \boldsymbol \psi) + c^{-2}}
 $$ {#eq-update-xi-mean}
 and
 $$
-\hat{v}_{\xi}^{(t+1)} = \left(\mathbb{E}^{(t)}({\boldsymbol \psi}^\top {\bf Z}^\top {\bf W}^{-1} {\bf Z} \boldsymbol \psi) + \mathbb{E}^{(t)}(c^{-2}) \right)^{-1}
+\hat{v}_{\xi}^{(t+1)} = \left(\mathbb{E}^{(t)}({\boldsymbol \psi}^\top {\bf Z}^\top {\bf W}^{-1} {\bf Z} \boldsymbol \psi) + c^{-2} \right)^{-1}
 $$ {#eq-update-xi-var}
 where $\mathbb{E}^{(t)}$ denotes the expected value of the current conditional posterior and a superscript of $(t+1)$ indicates an update to the parameter of interest on the next iteration of the algorithm.
 
