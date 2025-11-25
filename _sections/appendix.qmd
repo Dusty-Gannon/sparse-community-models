@@ -44,16 +44,27 @@ The key to our variational approximation approach is proper book-keeping of the 
 
 ### Conditional posteriors and updates for regression coefficients {.appendix}
 
-The first $S + 1$ parameters all receive weakly informative normal priors, and, because $\epsilon_{i,m,t}$ is normally-distributed for all $i,\ m,$ and $t$, the conditional posterior of $\tilde \beta_k$ is normal for $k = \{1, 2, ..., S+1\}$. The variational update for the mean and standard deviation of $\tilde\beta_k$, conditional on the current values of all the other parameters, is therefore
-
+The first $S + 1$ parameters all receive weakly informative normal priors, and, because $\epsilon_{i,m,t}$ is normally-distributed for all $i,\ m,$ and $t$, the conditional posterior of $\tilde \beta_k$ is normal for $k = \{1, 2, ..., S+1\}$. Specifically, the posterior of $\tilde \beta_k$, conditional on all other parameters is
 $$
-\begin{split}
-\mu_k = \frac{{\bf e}_{-k}^\top {\bf W}^{-1} \tilde{\bf X}_k}{\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k + \frac{1}{\tau^2}} \\
-s_k^2 = \left(\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k + \frac{1}{\tau^2}\right)^{-1}
-\end{split}
-$$ {#eq-update-nonsprs}
+p(\tilde \beta_k\ |\ {\bf y},\ {\boldsymbol \theta}_{-\tilde \beta_k}) = \mathcal{N}\left(\frac{{\bf e}_{-k}^\top {\bf W}^{-1} \tilde{\bf X}_k}{\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k + \frac{1}{\tau^2}},\  \left(\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k + \frac{1}{\tau^2}\right)^{-1}\right)
+$$
+where ${\boldsymbol \theta}_{-\tilde \beta_k}$ is the full set of parameters except for $\tilde \beta_k$, $\tilde {\bf X}_k$ is column $k$ of $\tilde {\bf X}$, and ${\bf e}_{-k}$ is a vector of partial residuals for explanatory variable $k$. That is, ${\bf e}_{-k} = ({\bf y} - \tilde {\bf X}_{-k}\tilde {\boldsymbol \beta}_{-k})$ where the $-k$ subscript indicates removing column and element $k$ from $\tilde \bf X$ and $\tilde {\boldsymbol \beta}$, respectively.
 
-where ${\bf e}_{-k}$ is the vector of partial residuals from regressing ${\bf y}$ against all covariates *except* $\tilde{\bf X}_k$, using the expected values of the current posterior of the regression coefficients, and $\tilde{\bf X}_k$ is the $k^\text{th}$ column of the design matrix $\tilde{\bf X}$. The hyperparameter $\tau^2$ is the variance of the of the normal prior placed on $\tilde \beta_k$ and the inverse weights matrix, ${\bf W}^{-1}$, is filled in with its expected values at the current step. 
+We can derive the variational approximation for $p(\tilde \beta_k\ |\ {\bf y},\ {\boldsymbol \theta}_{-\tilde \beta_k})$, $q(\tilde \beta_k\ |\ {\bf y},\ {\boldsymbol \theta}_{-\tilde \beta_k})$, through the identity that 
+$$
+q(\tilde \beta_k\ |\ {\bf y},\ {\boldsymbol \theta}_{-\tilde \beta_k}) = \exp\left\{\mathbb{E}_{-\tilde \beta_k}\big[\log p(\tilde \beta_k\ |\ {\bf y},\ {\boldsymbol \theta}_{-\tilde \beta_k})\big] \right\},
+$$
+where the expectation is taken over all parameters except $\tilde \beta_k$. This suggests an iterative approach where we update the parameters of each variational approximation, $q(\theta_i\ | {\boldsymbol \theta}_{-i})$, given the current parameters for the remaining set of conditional posteriors, in turn.
+
+The variational update for the mean and standard deviation of $\tilde\beta_k$, conditional on the current values of all the other $q$, is therefore
+$$
+\mu_k^{(t+1)} = \frac{\mathbb{E}^{(t)}({\bf e}_{-k}^\top) \mathbb{E}^{(t)}( {\bf W}^{-1} ) \tilde{\bf X}_k}{\tilde{\bf X}_k^\top \mathbb{E}^{(t)}( {\bf W}^{-1} ) \tilde{\bf X}_k + \frac{1}{\tau^2}}
+$$ {#eq-update-nonsprs-mu}
+and
+$$
+s_k^{2^{(t+1)}} = \left(\tilde{\bf X}_k^\top \mathbb{E}^{(t)}( {\bf W}^{-1} ) \tilde{\bf X}_k + \frac{1}{\tau^2}\right)^{-1}
+$$ {#eq-update-nonsprs-var}
+where the $(t)$ superscript indicates the iteration of the coordinate ascent algorithm [@cavi-vb]. The hyperparameter $\tau^2$ is the variance of the of the normal prior placed on $\tilde \beta_k$. 
 
 For regression coefficients that get spike-slab priors, we introduce an indicator variable, $\delta_k$ that takes that value of 1 with probability $\phi_k$ and 0 with probability $1 - \phi_k$, and multiply it by $\tilde \beta_k$ such that the prior for $\tilde \beta_k$ is the mixture model 
 
