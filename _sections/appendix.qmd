@@ -165,12 +165,12 @@ $$
 b_s^{(t+1)} = \frac{1}{2}\nu + \frac{1}{2}\sum_j \mathbb{E}^{(t)}(\psi_j^2).
 $${#eq-update-s2-rate}
 
-Finally, we can update the error variances, which, for $\sigma_1^2,\sigma_2^2,...,\sigma_S^2$ we give improper Jeffrey's priors of $1/\sigma_i^2$ for $i = 1,2,...,S$. The conditional posterior is therefore inverse gamma, with constant shape parameter $n/2$ and updates to the rate parameter of
+Finally, we can update the error variances, which, for $\sigma_1^2,\sigma_2^2,...,\sigma_S^2$ we give improper Jeffrey's priors of $1/\sigma_i^2$ for $i = 1,2,...,S$. The conditional posterior is therefore inverse gamma, with constant shape parameter $n_s/2 + 1$ and updates to the rate parameter of
 
 $$
-b_{\sigma_i} = \frac{1}{2}\left({\bf y}_{[i]}^\top{\bf y}_{[i]} - {\bf y}_{[i]}^\top\tilde{\bf X}_{[i]} \mathbb{E}(\tilde {\boldsymbol \beta}) - \mathbb{E}(\tilde{\boldsymbol \beta})^\top \tilde{\bf X}_{[i]}^\top {\bf y}_{[i]} + \mathbb{E}(\tilde{\boldsymbol \beta})^\top \tilde{\bf X}_{[i]}^\top \tilde{\bf X}\ \mathbb{E}(\tilde{\boldsymbol \beta})\right)
+b_{\sigma_i}^{(t+1)} = \frac{1}{2}\mathbb{E}\left(({\bf y}_{[i]} - \tilde{\bf X}_{[i]}\tilde{\boldsymbol \beta} - {\bf Z}_{[i]}{\boldsymbol \psi}\xi)^\top \tilde{\bf W}_{[i]}({\bf y}_{[i]} - \tilde{\bf X}_{[i]}\tilde{\boldsymbol \beta} - {\bf Z}_{[i]}{\boldsymbol \psi}\xi) \right)
 $$
 
-where ${\bf y}_{[i]}$ are just the elements of $\bf y$ that involve species $i$.
+where the subscript ${[i]}$ indicates that the data vectors and model matrices are subsets to just the rows in which the response is growth of species $i$. The matrix $\tilde {\bf W}$ is a matrix with known *inverse* weights and the vector of error variances factored out. For example, if the weight for observation $y_{i,t}$ is $1/\sqrt{N_{i,t-1}}$, where $N_{i,t}$ is the density or size of the population of species $i$ at time $t$, then $w_{i,t} = \sigma_i^2/{N_{i, t - 1}}$ and $\tilde w_i = N_{i,t}$.
 
 
