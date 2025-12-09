@@ -46,13 +46,13 @@ The key to our variational approximation approach is proper book-keeping of the 
 
 The first $S + 1$ parameters all receive weakly informative normal priors, and, because $\epsilon_{i,m,t}$ is normally-distributed for all $i,\ m,$ and $t$, the conditional posterior of $\tilde \beta_k$ is normal for $k = \{1, 2, ..., S+1\}$. Specifically, the posterior of $\tilde \beta_k$, conditional on all other parameters is
 $$
-p(\tilde \beta_k\ |\ {\bf y},\ {\boldsymbol \theta}_{-\tilde \beta_k}) = \mathcal{N}\left(\frac{{\bf e}_{-k}^\top {\bf W}^{-1} \tilde{\bf X}_k}{\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k + \frac{1}{\tau^2}},\  \left(\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k + \frac{1}{\tau^2}\right)^{-1}\right)
+p(\tilde \beta_k\ |\ {\boldsymbol \theta}_{-\tilde \beta_k},\ {\bf y},\ {\bf w}) = \mathcal{N}\left(\frac{{\bf e}_{-k}^\top {\bf W}^{-1} \tilde{\bf X}_k}{\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k + \frac{1}{\tau^2}},\  \left(\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k + \frac{1}{\tau^2}\right)^{-1}\right)
 $$
-where ${\boldsymbol \theta}_{-\tilde \beta_k}$ is the full set of parameters except for $\tilde \beta_k$, $\tilde {\bf X}_k$ is column $k$ of $\tilde {\bf X}$, and ${\bf e}_{-k}$ is a vector of partial residuals for explanatory variable $k$. That is, ${\bf e}_{-k} = ({\bf y} - \tilde {\bf X}_{-k}\tilde {\boldsymbol \beta}_{-k})$ where the $-k$ subscript indicates removing column and element $k$ from $\tilde \bf X$ and $\tilde {\boldsymbol \beta}$, respectively.
+where ${\boldsymbol \theta}_{-\tilde \beta_k}$ is the full set of parameters except for $\tilde \beta_k$, $\tilde {\bf X}_k$ is column $k$ of $\tilde {\bf X}$, and ${\bf e}_{-k}$ is a vector of partial (conditional) residuals for explanatory variable $k$. That is, ${\bf e}_{-k} = ({\bf y} - \tilde {\bf X}_{-k}\tilde {\boldsymbol \beta}_{-k} - {\bf Z u})$ where the $-k$ subscript indicates removing column and element $k$ from $\tilde \bf X$ and $\tilde {\boldsymbol \beta}$, respectively.
 
 We can derive the variational approximation for $p(\tilde \beta_k\ |\ {\bf y},\ {\boldsymbol \theta}_{-\tilde \beta_k})$, $q(\tilde \beta_k\ |\ {\bf y},\ {\boldsymbol \theta}_{-\tilde \beta_k})$, through the identity that 
 $$
-q(\tilde \beta_k\ |\ {\bf y},\ {\boldsymbol \theta}_{-\tilde \beta_k}) = \exp\left\{\mathbb{E}_{-\tilde \beta_k}\big[\log p(\tilde \beta_k\ |\ {\bf y},\ {\boldsymbol \theta}_{-\tilde \beta_k})\big] \right\},
+q(\tilde \beta_k\ |\ {\boldsymbol \theta}_{-\tilde \beta_k},\ {\bf y},\ {\bf w}) = \exp\left\{\mathbb{E}_{-\tilde \beta_k}\big[\log p(\tilde \beta_k\ |\ {\boldsymbol \theta}_{-\tilde \beta_k},\ {\bf y},\ {\bf w})\big] \right\},
 $$
 where the expectation is taken over all parameters except $\tilde \beta_k$. This suggests an iterative approach where we update the parameters of each variational approximation, $q(\theta_i\ | {\boldsymbol \theta}_{-i})$, given the current parameters for the remaining set of conditional posteriors, in turn.
 
@@ -62,29 +62,29 @@ $$
 $$ {#eq-update-nonsprs-mu}
 and
 $$
-s_k^{2^{(t+1)}} = \left(\tilde{\bf X}_k^\top \mathbb{E}^{(t)}( {\bf W}^{-1} ) \tilde{\bf X}_k + \frac{1}{\tau^2}\right)^{-1}
+\sigma_{\beta_k}^{2^{(t+1)}} = \left(\tilde{\bf X}_k^\top \mathbb{E}^{(t)}( {\bf W}^{-1} ) \tilde{\bf X}_k + \frac{1}{\tau^2}\right)^{-1}
 $$ {#eq-update-nonsprs-var}
 where the $(t)$ superscript indicates the iteration of the coordinate ascent algorithm [@cavi-vb]. The hyperparameter $\tau^2$ is the variance of the of the normal prior placed on $\tilde \beta_k$. 
 
-For regression coefficients that get spike-slab priors, we introduce an indicator variable, $\delta_k$ that takes that value of 1 with probability $\phi_k$ and 0 with probability $1 - \phi_k$, and multiply it by $\tilde \beta_k$ such that the prior for $\tilde \beta_k$ is the mixture model 
+For regression coefficients that get spike-slab priors, we introduce an indicator variable, $\delta_k$ that takes the value 1 with probability $p_k$ and 0 with probability $1 - p_k$, and multiply it by $\tilde \beta_k$ such that the prior for $\tilde \beta_k$ is the mixture model 
 
 $$
 \pi(\tilde \beta_k | \delta_k, {\bf W}) = \begin{cases}
-\mathcal{N}(0, \tau^2) & \text{w.p. } \phi_k\\
-0 & \text{w.p. } 1 - \phi_k
+\mathcal{N}(0, \tau^2) & \text{w.p. } p_k\\
+0 & \text{w.p. } 1 - p_k
 \end{cases}.
 $$ {#eq-spike-slab-prior}
 
 Thus, the update for the mean of the posterior of $\tilde \beta_k$ is
 
 $$
-\begin{split}
-\mu_k = \frac{{\bf e}_{-k}^\top {\bf W}^{-1} \tilde{\bf X}_k}{\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k + \frac{1}{\tau^2}} \mathbb{E} [\delta_k] \\
-s_k^2 = \left(\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k + \frac{1}{\tau^2}\right)^{-1}
-\end{split}
-$$ {#eq-update-sparse}
-
-where $\mathbb{E}[\delta_k]$ is the current expectation of the indicator variable $\delta_k$. Note that these derivations are similar to those presented in @carbonetto_vb_2012, but with weights included. We also use simple conjugate priors and variational approximations for the error variances instead of the Importance Sampling approach proposed by @carbonetto_vb_2012. 
+\mu_k^{(t+1)} = \frac{\mathbb{E}^{(t)}({\bf e}_{-k})^\top \mathbb{E}^{(t)}({\bf W}^{-1}) \tilde{\bf X}_k \mathbb{E}^{(t)}(\delta_k) }{ \tilde{\bf X}_k^\top \mathbb{E}^{(t)}({\bf W}^{-1}) \tilde{\bf X}_k \mathbb{E}^{(t)}(\delta_k^2) + \frac{1}{\tau^2}}
+$$ {#eq-update-sparse-mu}
+for the mean, and
+$$
+s_k^2 = \left(\tilde{\bf X}_k^\top {\bf W}^{-1} \tilde{\bf X}_k \mathbb{E}^{(t)}(\delta_k^2) + \frac{1}{\tau^2}\right)^{-1}
+$$ {#eq-update-sparse-var}
+for the variance, where $\mathbb{E}[\delta_k]$ is the current expectation of the indicator variable $\delta_k$. Note that these derivations are similar to those presented in @carbonetto_vb_2012, but with weights included. We also use simple conjugate priors and variational approximations for the error variances instead of the Importance Sampling approach proposed by @carbonetto_vb_2012. 
 
 ### Conditional posteriors and updates for latent indicators {.appendix}
 
